@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F4F2EC">
+<title>心动坐标 · 身体吸引力指数测评</title>
+<meta name="description" content="42 个具体场景，测你和某个人的吸引力结构：六维雷达图、生理性喜欢指数、心理性喜欢指数、九种关系类型。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23F4F2EC'/%3E%3Ccircle cx='16' cy='16' r='11' fill='none' stroke='%232A2A28' stroke-width='1.4'/%3E%3Cpath d='M16 9c3 3.4 5 6 5 8.6a5 5 0 0 1-10 0C11 15 13 12.4 16 9z' fill='none' stroke='%232A2A28' stroke-width='1.4'/%3E%3C/svg%3E">
+<style>
+:root{
+  --page:#F4F2EC; --bg:#F7F5F0; --panel:#EDEAE2;
+  --border:#D9D6CD; --border-2:#C9C5BA;
+  --ink-1:#2A2A28; --ink-2:#7C7B76; --ink-3:#9A988F;
+  --accent:#2A2A28; --on-accent:#F4F2EC;
+  --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  background:#CFCDC7; color:var(--ink-1);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  font-weight:300; letter-spacing:.01em;
+  display:flex; align-items:center; justify-content:center;
+  -webkit-font-smoothing:antialiased;
+}
+.phone{
+  position:relative; width:100%; height:100vh; height:100dvh;
+  max-width:560px; overflow:hidden; background:var(--page);
+  display:flex; flex-direction:column;
+}
+@media(min-width:561px){
+  .phone{height:min(880px,94dvh); box-shadow:0 1px 0 var(--border),0 18px 40px rgba(0,0,0,.06)}
+  body{padding:20px}
+}
+.screen{
+  position:absolute; inset:0; display:flex; flex-direction:column;
+  opacity:0; visibility:hidden; pointer-events:none;
+  transition:opacity .35s ease, transform .35s cubic-bezier(.16,1,.3,1);
+}
+.screen.active{opacity:1; visibility:visible; pointer-events:auto}
+.screen:not(.active){transform:translateY(10px)}
+.scroll{flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch}
+.mono{font-variant-numeric:tabular-nums; letter-spacing:.06em}
+
+#cover{padding:calc(40px + var(--sat)) 28px calc(26px + var(--sab)); align-items:center; text-align:center; justify-content:center}
+.cta{width:100%; margin-top:46px}
+.eyebrow{font-size:11px; letter-spacing:.22em; color:var(--ink-3); text-transform:uppercase}
+.cover-mark{width:64px; height:64px; margin:0 auto 22px}
+.cover-title{font-size:40px; font-weight:500; letter-spacing:.04em; line-height:1.15}
+.cover-sub{margin-top:14px; font-size:14px; line-height:1.9; color:var(--ink-2)}
+.cover-meta{margin-top:22px; width:100%; display:flex; justify-content:center; border-top:1px solid var(--border); border-bottom:1px solid var(--border)}
+.cover-meta div{flex:1; padding:12px 4px; font-size:11px; color:var(--ink-2); letter-spacing:.06em; white-space:nowrap}
+.cover-meta div + div{border-left:1px solid var(--border)}
+.cover-foot{font-size:11px; line-height:1.9; color:var(--ink-3)}
+.cover-foot b{font-weight:500; color:var(--ink-2)}
+
+.btn{
+  display:block; width:100%; padding:15px 18px; font-size:15px; font-family:inherit;
+  background:var(--accent); color:var(--on-accent); border:1px solid var(--accent);
+  cursor:pointer; letter-spacing:.06em; font-weight:400;
+}
+.btn.ghost{background:transparent; color:var(--ink-1); border-color:var(--border-2)}
+.btn:active{opacity:.85}
+
+#quiz{padding:calc(18px + var(--sat)) 22px calc(20px + var(--sab))}
+.topbar{display:flex; align-items:center; gap:12px; height:34px}
+.prev-btn{
+  width:34px; height:34px; border:1px solid var(--border-2); background:transparent;
+  color:var(--ink-1); font-size:15px; cursor:pointer; line-height:1;
+}
+.prev-btn[disabled]{opacity:.25; cursor:default}
+.progress-text{font-size:12px; color:var(--ink-2); letter-spacing:.12em}
+.progress-text.right{margin-left:auto; color:var(--ink-3)}
+.bar{height:1px; background:var(--border); margin:14px 0 0}
+.bar i{display:block; height:1px; width:0; background:var(--accent); transition:width .3s ease}
+.q-wrap{flex:1; display:flex; flex-direction:column; justify-content:center; padding:26px 0 8px; min-height:0}
+.q-dims{font-size:11px; letter-spacing:.2em; color:var(--ink-3)}
+.q-label{margin-top:10px; font-size:11px; letter-spacing:.16em; color:var(--ink-2)}
+.q-title{margin-top:12px; font-size:22px; line-height:1.65; font-weight:400}
+.opts{margin-top:26px; display:flex; flex-direction:column; gap:9px}
+.opt{
+  display:flex; gap:11px; align-items:flex-start; text-align:left; width:100%;
+  padding:13px 14px; font-size:14px; line-height:1.6; font-family:inherit; font-weight:300;
+  background:transparent; color:var(--ink-1); border:1px solid var(--border); cursor:pointer;
+  transition:background .18s ease, border-color .18s ease;
+}
+.opt .dot{width:5px; height:5px; margin-top:8px; background:var(--border-2); flex:0 0 auto}
+.opt:hover{border-color:var(--border-2)}
+.opt.pick{background:var(--panel); border-color:var(--ink-1)}
+.opt.pick .dot{background:var(--ink-1)}
+
+#result{padding:calc(20px + var(--sat)) 22px calc(22px + var(--sab))}
+.res-head{padding:6px 0 18px; border-bottom:1px solid var(--border)}
+.res-eyebrow{font-size:11px; letter-spacing:.2em; color:var(--ink-3)}
+.res-name{margin-top:10px; font-size:32px; font-weight:500; letter-spacing:.04em}
+.res-tag{margin-top:8px; font-size:14px; color:var(--ink-2); line-height:1.7}
+.idx{display:flex; border-bottom:1px solid var(--border)}
+.idx div{flex:1; padding:16px 0 14px}
+.idx div + div{border-left:1px solid var(--border); padding-left:16px}
+.idx span{display:block; font-size:11px; color:var(--ink-3); letter-spacing:.12em}
+.idx b{display:block; margin-top:6px; font-size:26px; font-weight:500}
+.radar{margin:6px 0 2px}
+.dims{padding:6px 0 4px}
+.dim{display:flex; align-items:center; gap:10px; padding:7px 0; font-size:12px; color:var(--ink-2)}
+.dim > span{width:58px; flex:0 0 auto}
+.dim .track{flex:1; height:1px; background:var(--border); position:relative}
+.dim .track i{position:absolute; left:0; top:-2px; height:5px; background:var(--ink-1); display:block}
+.dim b{width:28px; text-align:right; font-weight:400; color:var(--ink-1); font-variant-numeric:tabular-nums}
+.copy{padding:18px 0 4px; border-top:1px solid var(--border); margin-top:10px}
+.copy p{font-size:14px; line-height:2; color:var(--ink-1); margin-bottom:12px}
+.copy p.note{font-size:12px; color:var(--ink-3); line-height:1.9}
+.res-actions{display:flex; flex-direction:column; gap:9px; padding:10px 0 4px}
+.res-actions .row{display:flex; gap:9px}
+.res-actions .row .btn{flex:1}
+
+#gallery{padding:calc(18px + var(--sat)) 0 calc(20px + var(--sab))}
+.g-head{display:flex; align-items:center; gap:12px; padding:0 22px 14px; border-bottom:1px solid var(--border)}
+.g-title{font-size:16px; font-weight:500; letter-spacing:.06em}
+.g-list{padding:0 22px 24px}
+.g-card{padding:18px 0; border-bottom:1px solid var(--border)}
+.g-name{font-size:17px; font-weight:500; letter-spacing:.04em}
+.g-tag{margin-top:6px; font-size:13px; color:var(--ink-2); line-height:1.7}
+.g-cond{margin-top:8px; font-size:11px; color:var(--ink-3); line-height:1.8; letter-spacing:.02em}
+.g-adv{margin-top:8px; font-size:13px; color:var(--ink-1); line-height:1.8}
+.foot{padding:18px 22px 8px; font-size:11px; color:var(--ink-3); line-height:1.9; text-align:center}
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <section class="screen active" id="cover">
+    <div>
+      <div class="cover-mark">
+        <svg viewBox="0 0 64 64" width="64" height="64" fill="none" stroke="#2A2A28" stroke-width="1.4">
+          <circle cx="32" cy="32" r="26"/>
+          <path d="M32 8v48M8 32h48" stroke="#D9D6CD"/>
+          <path d="M32 20c4.5 5 8 8.8 8 13a8 8 0 0 1-16 0c0-4.2 3.5-8 8-13z"/>
+        </svg>
+      </div>
+      <div class="eyebrow">Relationship test</div>
+      <h1 class="cover-title">心动坐标</h1>
+      <p class="cover-sub">你和某个人的吸引力，<br>究竟长什么样。</p>
+      <div class="cover-meta">
+        <div>42 个场景</div>
+        <div>6 个维度</div>
+        <div>9 种关系</div>
+      </div>
+      <p class="cover-sub" style="margin-top:20px;font-size:13px">不问你有多喜欢他，<br>只看具体场景里的第一反应。</p>
+    </div>
+    <div class="cta">
+      <button class="btn" id="startBtn">开始测试</button>
+      <p class="cover-foot" style="margin-top:16px">约 6 分钟 · 结果仅保存在本机<br>本测评用于自我觉察，非心理诊断<br><b>作者 @愿召</b></p>
+    </div>
+  </section>
+
+  <section class="screen" id="quiz">
+    <div class="topbar">
+      <button class="prev-btn" id="prevBtn" aria-label="上一题">←</button>
+      <span class="progress-text mono" id="progText">1 / 42</span>
+      <span class="progress-text right">心动坐标</span>
+    </div>
+    <div class="bar"><i id="barFill"></i></div>
+    <div class="q-wrap">
+      <div class="q-dims" id="qDims"></div>
+      <div class="q-label mono" id="qLabel"></div>
+      <h2 class="q-title" id="qTitle"></h2>
+      <div class="opts" id="opts"></div>
+    </div>
+  </section>
+
+  <section class="screen" id="result">
+    <div class="res-head">
+      <div class="res-eyebrow">你的关系能量图</div>
+      <div class="res-name" id="resName"></div>
+      <div class="res-tag" id="resTag"></div>
+    </div>
+    <div class="scroll">
+      <div class="idx">
+        <div><span>生理性喜欢</span><b class="mono" id="idxP">0</b></div>
+        <div><span>心理性喜欢</span><b class="mono" id="idxM">0</b></div>
+      </div>
+      <div class="radar" id="radar"></div>
+      <div class="dims" id="dims"></div>
+      <div class="copy" id="copy"></div>
+      <div class="res-actions">
+        <div class="row">
+          <button class="btn ghost" id="galleryBtn">类型图鉴</button>
+          <button class="btn ghost" id="againBtn">再测一次</button>
+        </div>
+        <button class="btn" id="shareBtn">分享给朋友</button>
+      </div>
+      <div class="foot">作者 @愿召 · 本测评用于自我觉察，非心理诊断</div>
+    </div>
+  </section>
+
+  <section class="screen" id="gallery">
+    <div class="g-head">
+      <button class="prev-btn" id="galleryBack" aria-label="返回">←</button>
+      <div class="g-title">九种关系类型</div>
+    </div>
+    <div class="scroll">
+      <div class="g-list" id="galleryList"></div>
+      <div class="foot">作者 @愿召 · 本测评用于自我觉察，非心理诊断</div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+const DIMS = [
+  {key:"sensory",   name:"感官悸动", short:"感官"},
+  {key:"touch",     name:"身体接触", short:"接触"},
+  {key:"pleasure",  name:"即时愉悦", short:"愉悦"},
+  {key:"belonging", name:"精神归属", short:"归属"},
+  {key:"resonance", name:"灵魂共振", short:"共振"},
+  {key:"values",    name:"三观契合", short:"三观"}
+];
+
+const QUESTIONS = [
+  {dim:"sensory", text:"夜里十一点，他发来一条 8 秒语音，背景是风声和一句“到家了”。", opts:["听完就划走，回一个“好”","听一遍，回了个表情","听两遍，把手机贴近耳朵又听一次","反复听，留意他尾音里的气声","把这条语音存下来，后来又点开过"]},
+  {dim:"sensory", text:"咖啡店里，他抬眼看你，等你把话说完。", opts:["你继续讲，视线落在杯沿","对视一秒，你先移开","对视时你的语速慢下来","你看着他的睫毛，忘了下一句","耳朵发热，你低头喝水掩饰"]},
+  {dim:"sensory", text:"他把外套借给你，晚上你抱着外套回家。", opts:["挂在椅背上，没多想","闻了一下，是洗衣液的味道","你把外套抱在怀里","你又低头闻了一次，想起他说话的样子","那天晚上你枕着外套睡的"]},
+  {dim:"sensory", text:"深夜电话，他说“你先睡，我听着”。", opts:["你说好，挂了","你说再聊五分钟","你把手机放在枕边，听他那边翻身的动静","你闭着眼听他的呼吸，慢慢困了","第二天醒来，手机还在通话界面"]},
+  {dim:"sensory", text:"他站在窗边低头回消息，光落在侧脸上。", opts:["你继续做自己的事","你看了一眼，觉得他今天穿得不错","你多看了两秒","你拿起手机想拍，又放下","你走过去，从背后抱了他一下"]},
+  {dim:"sensory", text:"他出差三天，第二天你在街上看见一个相似的背影。", opts:["你没注意","你看了一眼，觉得有点像","你回头确认了一下","你站在原地看了几秒","你发消息说“刚看到一个人好像你”"]},
+  {dim:"sensory", text:"他俯身把掉进沙发缝的耳机抠出来，抬头递给你，两张脸不到一臂。", opts:["你接过来说谢谢，坐回去","你往后靠了一点","你接的时候碰到他的手指，没有缩手","你发现自己的呼吸变浅了","你没有马上接，先看了他一眼"]},
+
+  {dim:"touch", text:"绿灯亮，人很多，他伸手把你往里侧带。", opts:["你自己走，跟在他后面","你让开半步","你顺着他的方向走","你抓住他的手腕","过了马路你也没松手"]},
+  {dim:"touch", text:"冷气很足，他把手臂搭在你的椅背上。", opts:["你往另一边坐正","你没动，继续看屏幕","你往他那边靠了一点","你把头靠在他肩上","你把手放进他的掌心"]},
+  {dim:"touch", text:"他送你到楼下，说“那我走了”。", opts:["你说好，转身进门","你站在原地看他走","你抱了他一下，很快松开","你抱着他没松，脸埋在他肩上","你说“再站一会儿”，拉住他没让走"]},
+  {dim:"touch", reverse:true, text:"他伸手替你把被风吹乱的头发别到耳后。", opts:["你整个人定住，那半天都在想这个动作","你笑了一下，没有躲","你说“我自己来”，但没退开","你往后仰了一下头，避开","你抬手挡了一下，说不用"]},
+  {dim:"touch", text:"一起看剧，他盘腿坐着，膝盖碰到你的膝盖。", opts:["你把腿收回来","你没动，继续看","你也没挪，坐得更正","你把腿搭在他腿上","你靠过去，把头搁在他肩上"]},
+  {dim:"touch", text:"你发烧躺着，他伸手贴了一下你的额头。", opts:["你说没事，自己吃了药","你让他别靠太近，怕传染","你没躲，让他试温度","他的手放下来时，你抓了一下","你说“再摸一会儿”"]},
+  {dim:"touch", text:"晚上散步，路灯一盏盏过去，你们的手背偶尔碰到。", opts:["你把手插进口袋","你保持距离，碰到就分开","你没有刻意避开","你用小指勾了他一下","你直接牵住，十指扣上"]},
+
+  {dim:"pleasure", text:"周六下午，你们一起去超市买一周的菜。", opts:["你觉得这是任务，想快点结束","你按清单走，偶尔搭话","你们边逛边聊，时间过得快","你们在零食区磨了很久","回家路上你说“下次还一起来”"]},
+  {dim:"pleasure", text:"你加班到九点，他说在楼下等你。", opts:["你让他先回去","你下楼，说了几句就分开","你们在便利店吃了关东煮","你发现一天的疲惫散了大半","到家后你还在笑，给他发“今天谢谢你”"]},
+  {dim:"pleasure", text:"你们各坐一头看书，两个小时没说几句话。", opts:["你觉得尴尬，主动找话题","你时不时看他一眼","你习惯了，坐着挺自在","你觉得这个下午很舒服","你希望它再长一点"]},
+  {dim:"pleasure", text:"看完电影出来，站在商场门口。", opts:["你看了一眼时间，想着明天要早起","你说“那我先走了”","你们在门口又聊了十分钟","你提议再走一段","你舍不得分开，绕远路送他"]},
+  {dim:"pleasure", text:"你状态很差的一天，他约你吃饭。", opts:["你推掉了","你去了，吃得很少","你说了几句工作上的事","吃完饭你觉得轻了一点","分开时你说“今天还好有你”"]},
+  {dim:"pleasure", text:"一群人吃饭，他在桌子那头说话，你在这一头。", opts:["你低头吃菜","你偶尔接一句","你听他讲，觉得有意思","你隔着桌子跟他打手势","你想坐到他旁边去"]},
+  {dim:"pleasure", text:"第一次一起做饭，厨房很小，油烟机一直响。", opts:["你怕添乱，站在旁边看","你打下手，递个盐","你们分工，边做边聊","你们互相尝对方做的，笑出了声","吃完你不想收拾，只想再坐一会儿"]},
+
+  {dim:"belonging", text:"你搞砸了一件事，被上司当众说。", opts:["你谁也没说，自己消化","回家路上给他发了句“今天很糟”","你给他打了电话，说了十分钟","你在他面前哭了","你没有解释，只是靠着他坐了很久"]},
+  {dim:"belonging", reverse:true, text:"凌晨三点你醒了，心里发慌。", opts:["你直接拨给他，说“陪我一会儿”","你发消息问他睡了没","你翻了个身，自己躺着","你打开手机划了两下又放下","你戴上耳机，一个人熬到天亮"]},
+  {dim:"belonging", text:"第二次去他住的地方。", opts:["你坐在沙发边缘，包还背着","你把外套脱了，放在一边","你自己去厨房倒了杯水","你脱了鞋，盘腿坐在他的位置","你在他的冰箱上贴了一张便签"]},
+  {dim:"belonging", text:"你肠胃炎，他请了半天假来陪你。", opts:["你觉得不好意思，让他回去","你说谢谢，自己躺着","他煮了粥，你喝了两口","你让他坐在床边陪你说话","你睡着了，手还抓着他的衣角"]},
+  {dim:"belonging", text:"你妈打电话来催问，你挂了电话。", opts:["你没提这件事","你简单说了句“家里催”","你跟他讲了家里的事","你问他“换成你会怎么回”","你说“下次要不要一起回去吃个饭”"]},
+  {dim:"belonging", text:"你在他面前做了一件很丢脸的事。", opts:["你尴尬了很久，想找地方躲","你笑了一下，很快转移话题","你自嘲了一句","你看着他笑，自己也笑了","你说“反正你也不是外人”"]},
+  {dim:"belonging", text:"你情绪低，不想说话，他坐在旁边刷手机。", opts:["你觉得他不够在意，起身回房","你希望他问一句","你没说话，他也没问","你靠过去，把头放在他腿上","你说“就这样待着挺好”"]},
+
+  {dim:"resonance", reverse:true, text:"你讲了一个只有自己觉得好笑的冷笑话。", opts:["他接了一个更冷的，你们笑了很久","他愣了一下，然后笑出声","他问“笑点在哪”","他礼貌地笑了一下","他低头继续看手机"]},
+  {dim:"resonance", text:"看完一部节奏很慢的文艺片，走出影院。", opts:["你说“有点闷”","你等他先评价","你们聊了几句剧情","你们在路边站了二十分钟聊结尾","他说的一句理解，正好是你没说出口的那句"]},
+  {dim:"resonance", text:"刷到一条社会新闻，你们各自说了看法。", opts:["差得很远，你不想继续","你说了自己的，他点头","他补了一个你没想过的角度","你们越聊越深，忘了时间","你说“这件事我一直这么想，第一次遇到同频的人”"]},
+  {dim:"resonance", text:"他发来一张图，配了一句很奇怪的话。", opts:["你没看懂，回了个问号","你回了个“哈哈”","你懂了，回了一个更怪的","你们来回斗图十几条","你把这段对话截图存了下来"]},
+  {dim:"resonance", text:"你说了一件很小的事，比如楼下的猫、今天的云。", opts:["他“嗯”了一声","他说“哦，这样”","他问了一句细节","他接“我今天也看到……”","他记得，过几天还问起那只猫"]},
+  {dim:"resonance", text:"你分享了一首歌，说“这首我听了三年”。", opts:["他没点开","他说“回头听”","他听了，说不错","他发来一句歌词，说是他最喜欢的那段","他做了一个只给你看的歌单"]},
+  {dim:"resonance", text:"你们为一件小事争起来，各自有理。", opts:["你觉得没必要争，先停了","你们各说各的，没有结果","你听懂了他在意的是什么","他发现你真正想说的是另一件事","争完之后，你们都觉得更了解对方了"]},
+
+  {dim:"values", text:"聊到以后怎么花钱。", opts:["你们的分法差得很远","你说了你的，他没接","你们各自说了习惯","你们聊出一个都能接受的办法","你说“那就这么定”，他也觉得自然"]},
+  {dim:"values", text:"聊到以后和父母住不住一起。", opts:["你们的答案完全相反","你说了想法，他沉默","他说了他的顾虑","你们讨论了折中的方案","你们把“真到那一步”的细节都聊了"]},
+  {dim:"values", text:"你有一个去外地工作的机会。", opts:["你没跟他说","你提了一句，他说“你自己决定”","他问了待遇和周期","他帮你一起算利弊","他说“你去，我想办法”"]},
+  {dim:"values", text:"他手机响了，是异性朋友，他走到阳台去接。", opts:["你心里很不舒服，但没说","你等他回来问了一句","他说了是谁，你点了点头","你们聊了彼此对这件事的尺度","你发现你们的边界感差不多，不需要多解释"]},
+  {dim:"values", text:"你们聊到“要不要孩子”。", opts:["你们差得很远","大方向一致，细节不同","你说不好，走一步看一步","你们各自说了顾虑，谁也没说服谁","你们连“怎么养”都聊了"]},
+  {dim:"values", text:"你们冷战了一天。", opts:["你等他先开口，一直等","你发了条“在吗”","你把事情说清楚，他也说了","你们定了一个“吵架不过夜”的规矩","你发现你们处理冲突的方式很像"]},
+  {dim:"values", text:"朋友问你“你们什么打算”。", opts:["你说“没想过”","你说“再看吧”","你说“挺好的，先这样”","你说“我们聊过”","你说的时候，脑子里有具体的画面"]}
+];
+
+const TYPES = {
+  fatal:{
+    name:"致命吸引型", tag:"身体先给出反应，安全感还在路上。",
+    cond:"P ≥ 65、M < 50，且感官悸动或即时愉悦 ≥ 70",
+    copy:[
+      "你的雷达图立起来了：感官悸动、即时愉悦、身体接触三根明显更高，另外三根低一截。生理性喜欢处在上位，心理性喜欢还在下位，两条线之间有一道清楚的缝。",
+      "这段关系现在最有力的是当下的火花。你靠近他时身体的反应很诚实，相处本身就能给你能量。需要留意的是，强烈的唤醒容易让你跳过判断，把紧张读成确定。",
+      "下次心动的时候，记录三件具体的事：他做了什么、你怎么回应、事后你的感受。写满三次，再决定要不要加码。"
+    ],
+    advice:"把心动和适合分开记录，别在情绪高点做长期决定。"
+  },
+  body:{
+    name:"身体先行型", tag:"接触渴望最亮，其余维度还没长起来。",
+    cond:"P ≥ 65、M < 50（未命中致命吸引型）",
+    copy:[
+      "雷达图上，身体接触那一根最高，感官悸动紧随其后，其余四根依次低下去。生理性喜欢在中上位，心理性喜欢停在低位。",
+      "你的接触渴望是这段关系里最清楚的信息，它说明靠近他对你来说是自然的。需要留意的是，用亲密推动关系，会把还没谈拢的部分先放到一边。",
+      "在下一次身体靠近之前，挑一个你一直没问出口的问题问出来，看对方怎么接。"
+    ],
+    advice:"用一次坦白的问题，换掉一次靠得更近。"
+  },
+  honeymoon:{
+    name:"热恋同盟型", tag:"两边都在高位，共振或三观还差一点同步。",
+    cond:"P ≥ 65、M ≥ 50（未命中灵魂伴侣型）",
+    copy:[
+      "六根里有四根在高位，感官悸动、身体接触、即时愉悦、精神归属都亮着，灵魂共振或三观契合还差一点点。两个指数都在高位，只是没有完全同步。",
+      "优势是这段关系既有热度也有安心感，你在他身边能兴奋，也能放松。需要留意的是，热恋期的顺滑会盖住分歧，没聊透的议题会在后面自己冒出来。",
+      "找一件跟钱或家庭有关的具体事，把它从头聊到尾，聊完再看一次雷达图。"
+    ],
+    advice:"趁关系还热，把最难聊的一件现实问题聊掉。"
+  },
+  soul:{
+    name:"灵魂伴侣型", tag:"六个维度都在高位，想得到一起也待得住。",
+    cond:"P ≥ 65、M ≥ 65、灵魂共振 ≥ 70、三观契合 ≥ 65",
+    copy:[
+      "六根都亮着，灵魂共振和三观契合是最高的两根，生理与心理两条线一起处在高位。这是一张很完整的图。",
+      "优势是你们既能聊到深处，也能在日常里待得住，冲突之后有修复的路径。需要留意的是，同频容易让人以为不需要维护，把默契当成理所当然。",
+      "每个月留一次没有安排的相处，不聊计划，不解决问题，只看你们还能不能自在地待着。"
+    ],
+    advice:"把维护写进日常，别让默契替你们干活。"
+  },
+  family:{
+    name:"家人归属型", tag:"安心感最强，身体层面的火花不是主旋律。",
+    cond:"M ≥ 65、P < 65、精神归属 ≥ 70",
+    copy:[
+      "精神归属那一根明显最高，灵魂共振和三观契合跟在后面，前三根相对低一些。心理性喜欢在高位，生理性喜欢在中等或更低的位置。",
+      "优势是安心感，你在他身边能松下来，敢露出不体面的那一面。需要留意的是，舒服久了容易滑向室友式的相处，亲密感会被日常磨薄。",
+      "主动发起一次身体层面的靠近，牵手、拥抱，或者只是坐得更近一点，观察自己是愿意还是抗拒。"
+    ],
+    advice:"关系需要一点主动的热度，别让舒服变成默认。"
+  },
+  mind:{
+    name:"精神知己型", tag:"聊得深、想得近，身体反应安静。",
+    cond:"M ≥ 65、P < 65、精神归属 < 70",
+    copy:[
+      "灵魂共振和三观契合两根最高，精神归属稍低，前三根都在低位。心理性喜欢在高位，生理性喜欢明显在下。",
+      "优势是聊得深、想得近，你们理解世界的方式能对上。需要留意的是，这段关系可能长期停在“最好的朋友”这个位置，两边都不提。",
+      "用一句具体的话确认你想要的关系形态，比如“我想试试和你谈恋爱”，说完看对方的反应，不要用暗示。"
+    ],
+    advice:"说清楚，比猜半年更省力气。"
+  },
+  pushpull:{
+    name:"若即若离型", tag:"一个指数在中段，一个在低段，靠近与退开在切换。",
+    cond:"P < 65、M < 65，两个指数一个 ≥ 50、一个 < 50",
+    copy:[
+      "雷达图不对称，一个指数在中段，另一个在低段，六根里最亮的那根也不算高。你自己也能感觉到，靠近和退开在来回切换。",
+      "优势是还有张力，说明这段关系对你仍有吸引力。需要留意的是，反复试探会消耗双方，也会让你越来越难判断自己到底想要什么。",
+      "给自己两周的观察窗口，每次想靠近或想退开时记一笔，两周后看这些记录集中在什么场景。"
+    ],
+    advice:"把感觉写成记录，再决定要不要推进。"
+  },
+  warm:{
+    name:"温水陪伴型", tag:"六维集中在中段，稳定，没有峰值。",
+    cond:"P 与 M 都在 50–64",
+    copy:[
+      "六根都在中间，最高和最低之间差距不大，雷达图接近一个圆。两个指数都在中段，稳定，没有明显的峰值。",
+      "优势是省力，你们相处不费劲，日常能接上。需要留意的是，稳定容易被读成“就这样了”，热度不再被主动添加。",
+      "一起做一件你们都没做过的事，比如临时买票去邻近的城市，看水面下还有没有别的。"
+    ],
+    advice:"给稳定加一个新场景，观察它会不会变。"
+  },
+  watch:{
+    name:"待观察型", tag:"关系形状还没出来，样本太少。",
+    cond:"六维最大值 < 50；或分化度 < 15 且 P、M 都 < 50",
+    copy:[
+      "六根都在低位，或者高低差距很小，雷达图还没有形状。两个指数都在下位，这段关系的信息量还不够。",
+      "眼下的状态更像还没开始，或者还没看清，这本身没有对错，只是样本太少。",
+      "安排两次不同场景的相处：一次白天的琐事，比如一起办事、买菜；一次深夜的聊天。两次之后再测一遍，对比雷达图的变化。"
+    ],
+    advice:"先增加相处样本，再判断感受。"
+  }
+};
+
+const $ = (s) => document.querySelector(s);
+const screens = {cover:$("#cover"), quiz:$("#quiz"), result:$("#result"), gallery:$("#gallery")};
+function show(name){
+  Object.values(screens).forEach((el) => el.classList.remove("active"));
+  screens[name].classList.add("active");
+}
+
+let idx = 0;
+let answers = new Array(QUESTIONS.length).fill(null);
+
+function renderQ(){
+  const q = QUESTIONS[idx];
+  const dim = DIMS.find((d) => d.key === q.dim);
+  $("#progText").textContent = (idx + 1) + " / " + QUESTIONS.length;
+  $("#barFill").style.width = ((idx + 1) / QUESTIONS.length * 100) + "%";
+  $("#qDims").textContent = dim.name;
+  $("#qLabel").textContent = String(idx + 1).padStart(2, "0") + " · 场景";
+  $("#qTitle").textContent = q.text;
+  $("#prevBtn").disabled = idx === 0;
+  const box = $("#opts");
+  box.innerHTML = "";
+  q.opts.forEach((text, i) => {
+    const b = document.createElement("button");
+    b.className = "opt";
+    b.innerHTML = '<span class="dot"></span><span>' + text + "</span>";
+    if (answers[idx] === i + 1) b.classList.add("pick");
+    b.addEventListener("click", () => {
+      answers[idx] = i + 1;
+      box.querySelectorAll(".opt").forEach((el) => el.classList.remove("pick"));
+      b.classList.add("pick");
+      window.setTimeout(() => {
+        if (idx < QUESTIONS.length - 1) { idx += 1; renderQ(); }
+        else { showResult(); }
+      }, 220);
+    });
+    box.appendChild(b);
+  });
+}
+
+function scores(){
+  const raw = {};
+  const eff = {};
+  DIMS.forEach((d) => { raw[d.key] = 0; eff[d.key] = 0; });
+  QUESTIONS.forEach((q, i) => {
+    const given = answers[i] || 1;
+    const value = q.reverse ? 6 - given : given;
+    raw[q.dim] += given;
+    eff[q.dim] += value;
+  });
+  const pct = {};
+  DIMS.forEach((d) => { pct[d.key] = Math.round((eff[d.key] - 7) / 28 * 100); });
+  const p = Math.round((pct.sensory + pct.touch + pct.pleasure) / 3);
+  const m = Math.round((pct.belonging + pct.resonance + pct.values) / 3);
+  const list = DIMS.map((d) => pct[d.key]);
+  const spread = Math.max(...list) - Math.min(...list);
+  return {pct, p, m, spread};
+}
+
+function classify(s){
+  const {pct, p, m, spread} = s;
+  if (Math.max(...DIMS.map((d) => pct[d.key])) < 50 || (spread < 15 && p < 50 && m < 50)) return "watch";
+  if (p >= 65 && m >= 65 && pct.resonance >= 70 && pct.values >= 65) return "soul";
+  if (p >= 65 && m < 50 && (pct.sensory >= 70 || pct.pleasure >= 70)) return "fatal";
+  if (p >= 65 && m < 50) return "body";
+  if (p >= 65 && m >= 50) return "honeymoon";
+  if (m >= 65 && p < 65 && pct.belonging >= 70) return "family";
+  if (m >= 65 && p < 65) return "mind";
+  if (p < 65 && m < 65 && ((p >= 50 && m < 50) || (p < 50 && m >= 50))) return "pushpull";
+  return "warm";
+}
+
+function radarSVG(pct){
+  const cx = 170, cy = 148, R = 100;
+  const at = (i, r) => {
+    const a = (-90 + i * 60) * Math.PI / 180;
+    return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
+  };
+  let grid = "";
+  [0.25, 0.5, 0.75, 1].forEach((f) => {
+    const pts = DIMS.map((_, i) => at(i, R * f).map((n) => n.toFixed(1)).join(",")).join(" ");
+    grid += '<polygon points="' + pts + '" fill="none" stroke="#D9D6CD" stroke-width="1"/>';
+  });
+  let axes = "";
+  let labels = "";
+  DIMS.forEach((d, i) => {
+    const [x, y] = at(i, R);
+    axes += '<line x1="' + cx + '" y1="' + cy + '" x2="' + x.toFixed(1) + '" y2="' + y.toFixed(1) + '" stroke="#D9D6CD" stroke-width="1"/>';
+    const [lx, ly] = at(i, R + 20);
+    const anchor = Math.abs(lx - cx) < 8 ? "middle" : (lx > cx ? "start" : "end");
+    labels += '<text x="' + lx.toFixed(1) + '" y="' + (ly + 4).toFixed(1) + '" text-anchor="' + anchor + '" font-size="11" fill="#7C7B76">' + d.short + "</text>";
+  });
+  const pts = DIMS.map((d, i) => at(i, R * pct[d.key] / 100).map((n) => n.toFixed(1)).join(",")).join(" ");
+  let dots = "";
+  DIMS.forEach((d, i) => {
+    const [x, y] = at(i, R * pct[d.key] / 100);
+    dots += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="2.4" fill="#2A2A28"/>';
+  });
+  return '<svg viewBox="0 0 340 300" width="100%" height="260" role="img" aria-label="六维雷达图">' +
+    grid + axes +
+    '<polygon points="' + pts + '" fill="rgba(42,42,40,.10)" stroke="#2A2A28" stroke-width="1.5"/>' +
+    dots + labels + "</svg>";
+}
+
+function showResult(){
+  const s = scores();
+  const key = classify(s);
+  const t = TYPES[key];
+  $("#resName").textContent = t.name;
+  $("#resTag").textContent = t.tag;
+  $("#idxP").textContent = s.p;
+  $("#idxM").textContent = s.m;
+  $("#radar").innerHTML = radarSVG(s.pct);
+  $("#dims").innerHTML = DIMS.map((d) =>
+    '<div class="dim"><span>' + d.name + '</span><div class="track"><i style="width:' + s.pct[d.key] + '%"></i></div><b>' + s.pct[d.key] + "</b></div>"
+  ).join("");
+  $("#copy").innerHTML = t.copy.map((p) => "<p>" + p + "</p>").join("") +
+    '<p class="note">说明：百分制按（维度原始分 − 7）÷ 28 × 100 计算；生理性喜欢为前三项均值，心理性喜欢为后三项均值。本测评用于自我觉察，非心理诊断。</p>';
+  $("#result").dataset.type = key;
+  show("result");
+  $("#result .scroll").scrollTop = 0;
+}
+
+function renderGallery(){
+  $("#galleryList").innerHTML = Object.values(TYPES).map((t) =>
+    '<div class="g-card"><div class="g-name">' + t.name + '</div><div class="g-tag">' + t.tag +
+    '</div><div class="g-cond">判定：' + t.cond + '</div><div class="g-adv">' + t.advice + "</div></div>"
+  ).join("");
+}
+
+async function copyText(text){
+  try{
+    await navigator.clipboard.writeText(text);
+    alert("已复制，去粘贴发送吧");
+  }catch(e){
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+    alert("已复制，去粘贴发送吧");
+  }
+}
+
+$("#startBtn").addEventListener("click", () => {
+  idx = 0;
+  answers = new Array(QUESTIONS.length).fill(null);
+  renderQ();
+  show("quiz");
+});
+$("#prevBtn").addEventListener("click", () => {
+  if (idx === 0) return;
+  idx -= 1;
+  renderQ();
+});
+$("#againBtn").addEventListener("click", () => {
+  idx = 0;
+  answers = new Array(QUESTIONS.length).fill(null);
+  renderQ();
+  show("quiz");
+});
+$("#galleryBtn").addEventListener("click", () => { renderGallery(); show("gallery"); });
+$("#galleryBack").addEventListener("click", () => {
+  if ($("#result").dataset.type) {
+    show("result");
+  } else {
+    location.hash = "";
+    show("cover");
+  }
+});
+
+function routeFromHash(){
+  if (location.hash === "#gallery" || location.hash === "#types") {
+    renderGallery();
+    show("gallery");
+  }
+}
+
+if (location.hash === "#gallery" || location.hash === "#types") {
+  renderGallery();
+  show("gallery");
+}
+window.addEventListener("hashchange", routeFromHash);
+$("#shareBtn").addEventListener("click", async () => {
+  const s = scores();
+  const t = TYPES[classify(s)];
+  const url = location.origin + location.pathname.replace(/index\.html$/, "");
+  const text = "愿召的测评：我是「" + t.name + "」，生理性喜欢 " + s.p + "，心理性喜欢 " + s.m + "。你也来测测 " + url;
+  if (navigator.share){
+    try{
+      await navigator.share({title:"心动坐标 · 身体吸引力指数测评", text, url});
+      return;
+    }catch(e){
+      if (e && e.name === "AbortError") return;
+    }
+  }
+  copyText(text);
+});
+</script>
+</body>
+</html>
